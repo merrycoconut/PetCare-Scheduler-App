@@ -2,8 +2,11 @@ package com.app;
 
 import com.utils.Appointment;
 import com.utils.Pet;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +23,8 @@ public class PetCareScheduler {
 
     public static void main(String[] args) {
         boolean isRunning = true;
+
+        loadHouseholdsFromFile();
 
         while (isRunning) {
             System.out.println("Welcome to the Pet Care Scheduler!\nPlease select an option from the menu below:\n1. Register your pets\n2. Schedule an appointment\n3. View records\n4. Generate reports\n5. Save and Exit");
@@ -181,6 +186,19 @@ public class PetCareScheduler {
             obj.close();
         } catch (IOException e) {
             System.out.println("Error saving data: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void loadHouseholdsFromFile() {
+        // Use a try-with-resources block to automatically close the input stream
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("petSchedule.ser"))) {
+            pets = (Map<String, Pet>) in.readObject();
+            System.out.println("Pet schedule data loaded.");
+        } catch (FileNotFoundException e) {
+            System.out.println("No saved data found. Starting fresh.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error loading data: " + e.getMessage());
         }
     }
 }
