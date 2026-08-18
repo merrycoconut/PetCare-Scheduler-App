@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class Pet implements Serializable {
+    private static int idCounter = 1;
 
-    private int id = 0;
+    private int id;
     private String name;
     private String species;
     private int age;
@@ -18,7 +19,7 @@ public class Pet implements Serializable {
     private ArrayList<Appointment> listOfAppointments;
 
     public Pet(String petName, String petSpecies, String petOwnerName, String petContactInfo) {
-        id += 1;
+        id = idCounter++;
         name = petName;
         species = petSpecies;
         ownerName = petOwnerName;
@@ -55,7 +56,7 @@ public class Pet implements Serializable {
         return this.registrationDate;
     }
 
-    public ArrayList<Appointment> getListOfAppointment() {
+    public ArrayList<Appointment> getListOfAppointments() {
         return this.listOfAppointments;
     }
 

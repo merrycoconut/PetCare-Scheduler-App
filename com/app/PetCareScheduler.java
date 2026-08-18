@@ -38,26 +38,30 @@ public class PetCareScheduler {
 
             String userInput = scanner.nextLine();
 
-            switch (userInput) {
-                case "1":
-                    registerPet();
-                    break;
-                case "2":
-                    scheduleAppointment();
-                    break;
-                case "3":
-                    viewRecords();
-                    break;
-                case "4":
-                    generateReports();
-                    break;
-                case "5":
-                    savePetsToFile();
-                    isRunning = false;
-                    System.out.println("Data saved. Goodbye!");
-                    break;
-                default:
-                    throw new AssertionError();
+            try {
+                switch (userInput) {
+                    case "1":
+                        registerPet();
+                        break;
+                    case "2":
+                        scheduleAppointment();
+                        break;
+                    case "3":
+                        displayData();
+                        break;
+                    case "4":
+                        generateReports();
+                        break;
+                    case "5":
+                        savePetsToFile();
+                        isRunning = false;
+                        System.out.println("Data saved. Goodbye!");
+                        break;
+                    default:
+                        throw new AssertionError();
+                }
+            } catch (AssertionError e) {
+                System.err.println("Error: " + e.getMessage());
             }
 
         }
@@ -66,31 +70,36 @@ public class PetCareScheduler {
     }
 
     public static void registerPet() {
-        System.out.println("Please enter the name of your pet: ");
-        String petName = scanner.nextLine().trim().toUpperCase();
+        Pet newPet;
+        while (true) {
+            System.out.println("Please enter the name of your pet: ");
+            String petName = scanner.nextLine().trim().toUpperCase();
 
-        System.out.println("Please enter the species of your pet: ");
-        String petSpecies = scanner.nextLine();
+            System.out.println("Please enter the species of your pet: ");
+            String petSpecies = scanner.nextLine();
 
-        System.out.println("Please enter the age of your pet: ");
-        int petAge = scanner.nextInt();
-        scanner.nextLine();
+            System.out.println("Please enter the age of your pet: ");
+            int petAge = scanner.nextInt();
+            scanner.nextLine();
 
-        System.out.println("Please enter the name of the pet owner: ");
-        String petOwnerName = scanner.nextLine().trim();
+            System.out.println("Please enter the name of the pet owner: ");
+            String petOwnerName = scanner.nextLine().trim();
 
-        System.out.println("Please enter the contact information of the pet owner: ");
-        String petContactInfo = scanner.nextLine().trim();
+            System.out.println("Please enter the contact information of the pet owner: ");
+            String petContactInfo = scanner.nextLine().trim();
 
-        try {
-            Pet newPet = new Pet(petName, petSpecies, petOwnerName, petContactInfo);
-            newPet.setAge(petAge);
-            pets.put(petName, newPet);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            try {
+                newPet = new Pet(petName, petSpecies, petOwnerName, petContactInfo);
+                newPet.setAge(petAge);
+                pets.put(petName, newPet);
+                break;
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
         }
 
-        System.out.println("Pet registerd! ");
+        System.out.println("Pet registered! ");
+        System.out.println(newPet);
     }
 
     public static void scheduleAppointment() {
@@ -109,6 +118,7 @@ public class PetCareScheduler {
 
         // The pet is in map, get the target pet
         Pet targetPet = pets.get(petName);
+        Appointment newAppointment;
 
         // Create a new apppointment
         while (true) {
@@ -128,7 +138,7 @@ public class PetCareScheduler {
                 String appointmentNote = scanner.nextLine();
 
                 // Create a new appointment
-                Appointment newAppointment = new Appointment(appointmentType, fAppointmentTime, appointmentNote);
+                newAppointment = new Appointment(appointmentType, fAppointmentTime, appointmentNote);
 
                 // Add the new appointment to the pet's appointment list
                 targetPet.addNewAppointment(newAppointment);
@@ -142,9 +152,10 @@ public class PetCareScheduler {
         }
 
         System.out.println("Appointment scheduled! ");
+        System.out.println(newAppointment);
     }
 
-    public static void viewRecords() {
+    public static void displayData() {
         if (pets.isEmpty()) {
             System.out.println("There is no pet yet. Register first. ");
             return;
@@ -165,7 +176,14 @@ public class PetCareScheduler {
                 // View all appointments for a specific pet 
                 System.out.println("Please enter the name of the pet your want to view: ");
                 String petName = scanner.nextLine().toUpperCase();
-                ArrayList<Appointment> appointments = pets.get(petName).getListOfAppointment();
+                Pet searchingPet = pets.get(petName);
+
+                if (searchingPet == null) {
+                    System.out.println("Can not find this pet. ");
+                    return;
+                }
+
+                ArrayList<Appointment> appointments = searchingPet.getListOfAppointments();
                 appointments.forEach(appointment -> {
                     System.out.println(appointment);
                 });
@@ -175,14 +193,16 @@ public class PetCareScheduler {
                 ArrayList<Appointment> upcomingAppointmentsForAllPets = new ArrayList<>();
 
                 for (Pet pet : pets.values()) {
-                    if (pet.getListOfAppointment().isEmpty()) {
+                    if (pet.getListOfAppointments().isEmpty()) {
                         continue;
                     }
+
+                    System.out.println(pet);
 
                     // Get all the upcoming appointments on this pet
                     LocalDateTime currentTime = LocalDateTime.now();
 
-                    ArrayList<Appointment> upcomingAppointments = pet.getListOfAppointment().stream()
+                    ArrayList<Appointment> upcomingAppointments = pet.getListOfAppointments().stream()
                             .filter(appointment -> appointment.getAppointmentTime().isAfter(currentTime))
                             .collect(Collectors.toCollection(ArrayList::new));
 
@@ -203,14 +223,14 @@ public class PetCareScheduler {
                 for (Pet pet : pets.values()) {
                     System.out.println("Pet Name: " + pet);
 
-                    if (pet.getListOfAppointment().isEmpty()) {
+                    if (pet.getListOfAppointments().isEmpty()) {
                         System.out.println(pet + "has no past appointment. ");
                         continue;
                     }
 
                     LocalDateTime currentTime = LocalDateTime.now();
 
-                    ArrayList<Appointment> pastAppointments = pet.getListOfAppointment().stream()
+                    ArrayList<Appointment> pastAppointments = pet.getListOfAppointments().stream()
                             .filter(appointment -> appointment.getAppointmentTime().isBefore(currentTime))
                             .collect(Collectors.toCollection(ArrayList::new));
 
@@ -230,31 +250,32 @@ public class PetCareScheduler {
             return;
         }
 
-        pets.values().forEach(pet -> {
-            System.out.println("Please enter the report you want to generate for " + pet.getName());
-            System.out.println("1. Upcoming appointments in the next week: ");
-            System.out.println("2. Overdue appointments for a vet visit in the last 6 months:  ");
+        System.out.println("Please enter the report you want to generate for: ");
+        System.out.println("1. Upcoming appointments in the next week. ");
+        System.out.println("2. Overdue appointments for a vet visit in the last 6 months. ");
 
-            String userInput = scanner.nextLine();
+        String userInput = scanner.nextLine();
 
-            System.out.println(pet);
-
-            switch (userInput) {
-                case "1":
+        switch (userInput) {
+            case "1":
+                pets.values().forEach(pet -> {
                     System.out.println(pet.getName() + "'s upcoming appointments in the next week: ");
                     pet.getNextWeekAppointments().forEach(appointment -> {
                         System.out.println(appointment);
                     });
-                    break;
-                case "2":
+                });
+                break;
+
+            case "2":
+                pets.values().forEach(pet -> {
                     System.out.println(pet.getName() + "'s overdue appointments for a vet visit in the last 6 months: ");
                     pet.getOverdueVetAppointments().forEach(appointment -> {
                         System.out.println(appointment);
                     });
-                    break;
 
-            }
-        });
+                });
+                break;
+        }
 
         System.out.println("Report generated! ");
 

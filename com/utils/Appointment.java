@@ -8,12 +8,12 @@ public class Appointment implements Serializable {
 
     private String appointmentType;
     private LocalDateTime appointmentTime;
-    private String notes;
+    private String appointmentNotes;
 
-    public Appointment(String appointmentType, LocalDateTime appointmentTime, String notes) {
+    public Appointment(String appointmentType, LocalDateTime appointmentTime, String appointmentNotes) {
         this.appointmentType = appointmentType;
         this.appointmentTime = appointmentTime;
-        this.notes = notes;
+        this.appointmentNotes = appointmentNotes;
     }
 
     public String getAppointmentType() {
@@ -24,23 +24,23 @@ public class Appointment implements Serializable {
         return this.appointmentTime;
     }
 
-    public String getNotes() {
-        return this.notes;
+    public String getappointmentNotes() {
+        return this.appointmentNotes;
     }
 
     public void setAppointmentType(String appointmentType) {
         this.appointmentType = appointmentType;
     }
 
-    public void setAppointmentTime(LocalDateTime newAppointmentTime) {
-        this.appointmentTime = newAppointmentTime;
+    public void setAppointmentTime(LocalDateTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
     }
 
-    public void setAppointmentNotes(String notes) {
-        if (!notes.equals("0")) {
-            this.notes = notes;
+    public void setAppointmentNotes(String appointmentNotes) {
+        if (!appointmentNotes.equals("0")) {
+            this.appointmentNotes = appointmentNotes;
         } else {
-            this.notes = "-";
+            this.appointmentNotes = "-";
         }
     }
 
@@ -51,6 +51,6 @@ public class Appointment implements Serializable {
 
         return "Appointment Type: " + this.appointmentType
                 + "\nAppointment Time: " + stringDateTime
-                + "\nNotes: " + this.notes;
+                + "\nNotes: " + this.appointmentNotes;
     }
 }

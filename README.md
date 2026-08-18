@@ -10,7 +10,7 @@ A simple, console-based Java app that manage and store each pet's activities.
 - Log important appointments
 - Track upcoming tasks
 - Keep a history of past visits
-- Storing information safely  when the app closes
+- Storing information safely when the app closes
 
 ## Installation
 
@@ -26,7 +26,7 @@ A simple, console-based Java app that manage and store each pet's activities.
 Start the application:
 
 ```bash
-java com.app.PetCare-Scheduler-App 
+java -cp . com.app.PetCareScheduler
 ```
 
 ## Technologies Used
