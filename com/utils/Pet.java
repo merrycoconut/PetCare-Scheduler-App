@@ -1,11 +1,12 @@
 package com.utils;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class Pet {
+public class Pet implements Serializable{
 
     private int id = 0;
     private String name;
@@ -23,6 +24,7 @@ public class Pet {
         ownerName = petOwnerName;
         contactInfo = petContactInfo;
         registrationDate = LocalDateTime.now();
+        listOfAppointments = new ArrayList<>();
     }
 
     public int getId() {
@@ -64,7 +66,7 @@ public class Pet {
         LocalDateTime nextWeek = currentTime.plusDays(7);
 
         ArrayList<Appointment> upComingAppointments = allAppointments.stream()
-                .filter(appointment -> appointment.getAppointmentTime().isBefore(nextWeek))
+                .filter(appointment -> appointment.getAppointmentTime().isAfter(currentTime) && appointment.getAppointmentTime().isBefore(nextWeek))
                 .collect(Collectors.toCollection(ArrayList::new));
 
         return upComingAppointments;
@@ -74,7 +76,7 @@ public class Pet {
         ArrayList<Appointment> allAppointments = this.listOfAppointments;
 
         ArrayList<Appointment> overdueAppointments = allAppointments.stream()
-                .filter(appointment -> appointment.getAppointmentTime().isAfter(LocalDateTime.now()))
+                .filter(appointment -> appointment.getAppointmentTime().isBefore(LocalDateTime.now()))
                 .collect(Collectors.toCollection(ArrayList::new));
 
         return overdueAppointments;
@@ -89,7 +91,7 @@ public class Pet {
     }
 
     public void addNewAppointment(Appointment newAppointment) {
-        listOfAppointments.add(newAppointment);
+        this.listOfAppointments.add(newAppointment);
     }
 
     @Override

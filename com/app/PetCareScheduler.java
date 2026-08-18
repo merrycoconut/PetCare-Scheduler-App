@@ -8,16 +8,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
 public class PetCareScheduler {
 
     private static Map<String, Pet> pets = new HashMap<>();
-    private static ArrayList<Appointment> upcomingAppointments;
-    private static ArrayList<Appointment> pastAppointments;
+    private static ArrayList<Appointment> upcomingAppointments = new ArrayList<>();
+    private static ArrayList<Appointment> pastAppointments= new ArrayList<>();
 
     private static Scanner scanner = new Scanner(System.in);
 
@@ -27,29 +30,36 @@ public class PetCareScheduler {
         loadHouseholdsFromFile();
 
         while (isRunning) {
-            System.out.println("Welcome to the Pet Care Scheduler!\nPlease select an option from the menu below:\n1. Register your pets\n2. Schedule an appointment\n3. View records\n4. Generate reports\n5. Save and Exit");
-            int userInput = scanner.nextInt();
+            System.out.println("Welcome to the Pet Care Scheduler!");
+            System.out.println("Please select an option from the menu below:");
+            System.out.println("1. Register your pets");
+            System.out.println("2. Schedule an appointment");
+            System.out.println("3. View records");
+            System.out.println("4. Generate reports");
+            System.out.println("5. Save and Exit");
+
+            String userInput = scanner.nextLine();
 
             switch (userInput) {
-                case 1:
+                case "1":
                     registerPet();
                     break;
-                case 2:
+                case "2":
                     scheduleAppointment();
                     break;
-                case 3:
+                case "3":
                     viewRecords();
                     break;
-                case 4:
+                case "4":
                     generateReports();
                     break;
-                case 5:
+                case "5":
                     savePetsToFile();
                     isRunning = false;
                     System.out.println("Data saved. Goodbye!");
                     break;
                 default:
-                    System.out.println("Invalid option. Please try again.");
+                    throw new AssertionError();
             }
 
         }
@@ -59,15 +69,20 @@ public class PetCareScheduler {
 
     public static void registerPet() {
         System.out.println("Please enter the name of your pet: ");
-        String petName = scanner.next().toUpperCase();
+        String petName = scanner.nextLine().trim().toUpperCase();
+
         System.out.println("Please enter the species of your pet: ");
-        String petSpecies = scanner.next();
+        String petSpecies = scanner.nextLine();
+
         System.out.println("Please enter the age of your pet: ");
         int petAge = scanner.nextInt();
+        scanner.nextLine();
+
         System.out.println("Please enter the name of the pet owner: ");
-        String petOwnerName = scanner.next();
+        String petOwnerName = scanner.nextLine().trim();
+
         System.out.println("Please enter the contact information of the pet owner: ");
-        String petContactInfo = scanner.next();
+        String petContactInfo = scanner.nextLine().trim();
 
         try {
             Pet newPet = new Pet(petName, petSpecies, petOwnerName, petContactInfo);
@@ -76,60 +91,84 @@ public class PetCareScheduler {
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
-
     }
 
     public static void scheduleAppointment() {
         System.out.println("Please enter the pet name if you already register your pet. If not, please enter 0 and register your pet first. ");
-        String petName = scanner.next();
+        String petName = scanner.nextLine().toUpperCase();
+
+        // Handle edge cases: pet is not in map.
         if (petName.equals("0")) {
             return;
         }
-        // Get the target pet
+
+        if (pets.get(petName) == null) {
+            System.out.println("Can not find the pet name. Please check. ");
+            return;
+        }
+
+        // The pet is in map, get the target pet
         Pet targetPet = pets.get(petName);
 
         // Create a new apppointment
-        System.out.println("Please enter the type of your appointment from the following:\n Visit\n Vaccination\n Grooming ");
-        String appointmentType = scanner.next();
-        System.out.println("Please enter the type of your appointment time with the MM-dd-yyyy HH:mm:ss format. ");
-        String appointmentTime = scanner.next();
-        System.out.println("Please enter the note of your appointment. If nothing to add, please enter 0");
-        String appointmentNote = scanner.next();
+        while (true) {
+            try {
+                Appointment newAppointment = new Appointment();
 
-        Appointment newAppointment = new Appointment();
-        newAppointment.setAppointmentType(appointmentType);
-        newAppointment.setAppointmentTime(appointmentTime);
-        newAppointment.setAppointmentNotes(appointmentNote);
+                System.out.println("Please enter the type of your appointment from the following:\n Visit\n Vaccination\n Grooming ");
+                String appointmentType = scanner.nextLine();
+                if (!"Visit".equals(appointmentType) && !"Vaccination".equals(appointmentType) && !"Grooming".equals(appointmentType)) {
+                    throw new InputMismatchException("Invalid appointment type.");
+                }
+                newAppointment.setAppointmentType(appointmentType);
 
-        // Add the new appointment to the pet's appointment list
-        targetPet.addNewAppointment(newAppointment);
+                System.out.println("Please enter the type of your appointment time with the MM-dd-yyyy HH:mm:ss format. ");
+                String appointmentTime = scanner.nextLine();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
+                LocalDateTime fAppointmentTime = LocalDateTime.parse(appointmentTime, formatter);
+                newAppointment.setAppointmentTime(fAppointmentTime);
 
-        // Add the new appointment to the map of appointmens
-        upcomingAppointments.add(newAppointment);
+                System.out.println("Please enter the note of your appointment. If nothing to add, please enter 0");
+                String appointmentNote = scanner.nextLine();
+                newAppointment.setAppointmentNotes(appointmentNote);
+
+                // Add the new appointment to the pet's appointment list
+                targetPet.addNewAppointment(newAppointment);
+
+                // Add the new appointment to the list of appointmens
+                upcomingAppointments.add(newAppointment);
+                break;
+            } catch (InputMismatchException e) {
+                System.err.println("Error: " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+            }
+        }
+
     }
 
     public static void viewRecords() {
         // Show the following information based on the option chosen: 
-        System.out.println("Please enter the record you want to view: 1. View all pets. \n 2. View all Appointment of a specific pet\n 3.Upcoming appointments for all pets\n 4.Past appointment history for each pet");
-        int userInput = scanner.nextInt();
+        System.out.println("Please enter the record you want to view:\n 1. View all pets. \n 2. View all Appointment of a specific pet\n 3. Upcoming appointments for all pets\n 4. Past appointment history for each pet");
+        String userInput = scanner.nextLine();
 
         switch (userInput) {
-            case 1:
+            case "1":
                 // View all registered pets 
                 pets.forEach((key, value) -> {
                     System.out.println(value);
                 });
                 break;
-            case 2:
+            case "2":
                 // View all appointments for a specific pet 
                 System.out.println("Please enter the name of the pet your want to view: ");
-                String petName = scanner.next().toUpperCase();
+                String petName = scanner.nextLine().toUpperCase();
                 ArrayList<Appointment> appointments = pets.get(petName).getListOfAppointment();
                 appointments.forEach(appointment -> {
                     System.out.println(appointment);
                 });
                 break;
-            case 3:
+            case "3":
                 // View upcoming appointments for all pets 
                 if (upcomingAppointments.isEmpty()) {
                     System.out.println("This is no upcoming appointments. ");
@@ -139,10 +178,10 @@ public class PetCareScheduler {
                     });
                 }
                 break;
-            case 4:
+            case "4":
                 // - Past appointment history for each pet
                 if (pastAppointments.isEmpty()) {
-                    System.out.println("There is not past appointment. ");
+                    System.out.println("There is no past appointment. ");
                 } else {
                     pastAppointments.forEach(appointment -> {
                         System.out.println(appointment);

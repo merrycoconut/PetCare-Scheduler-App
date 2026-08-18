@@ -1,10 +1,10 @@
 package com.utils;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.InputMismatchException;
 
-public class Appointment {
+public class Appointment implements Serializable{
 
     private String appointmentType;
     private LocalDateTime appointmentTime;
@@ -23,25 +23,11 @@ public class Appointment {
     }
 
     public void setAppointmentType(String appointmentType) {
-        try {
-            if (!"Visit".equals(appointmentType) && !"Vaccination".equals(appointmentType) && !"Grooming".equals(appointmentType)) {
-                throw new InputMismatchException("Invalid appointment type.");
-            }
-            this.appointmentType = appointmentType;
-        } catch (InputMismatchException e) {
-            System.err.println("Error: " + e.getMessage());
-        }
-
+        this.appointmentType = appointmentType;
     }
 
-    public void setAppointmentTime(String newAppointmentTime) {
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
-            this.appointmentTime = LocalDateTime.parse(newAppointmentTime, formatter);
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-        }
-
+    public void setAppointmentTime(LocalDateTime newAppointmentTime) {
+        this.appointmentTime = newAppointmentTime;
     }
 
     public void setAppointmentNotes(String notes) {
