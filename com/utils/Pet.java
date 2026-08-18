@@ -81,11 +81,39 @@ public class Pet implements Serializable {
         ArrayList<Appointment> overdueAppointments = appointments.stream()
                 .filter(appointment
                         -> appointment.getAppointmentTime().isBefore(currentTime)
-                            && appointment.getAppointmentTime().isAfter(pastSixMonths)
+                && appointment.getAppointmentTime().isAfter(pastSixMonths)
                 )
                 .collect(Collectors.toCollection(ArrayList::new));
 
         return overdueAppointments;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSpecies(String species) {
+        this.species = species;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public void setContactInfo(String contactInfo) {
+        this.contactInfo = contactInfo;
+    }
+
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
+    public void setListOfAppointments(ArrayList<Appointment> listOfAppointments) {
+        this.listOfAppointments = listOfAppointments;
     }
 
     public void setAge(int age) {

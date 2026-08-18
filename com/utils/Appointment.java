@@ -4,11 +4,17 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Appointment implements Serializable{
+public class Appointment implements Serializable {
 
     private String appointmentType;
     private LocalDateTime appointmentTime;
     private String notes;
+
+    public Appointment(String appointmentType, LocalDateTime appointmentTime, String notes) {
+        this.appointmentType = appointmentType;
+        this.appointmentTime = appointmentTime;
+        this.notes = notes;
+    }
 
     public String getAppointmentType() {
         return this.appointmentType;

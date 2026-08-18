@@ -89,6 +89,8 @@ public class PetCareScheduler {
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
+
+        System.out.println("Pet registerd! ");
     }
 
     public static void scheduleAppointment() {
@@ -111,24 +113,22 @@ public class PetCareScheduler {
         // Create a new apppointment
         while (true) {
             try {
-                Appointment newAppointment = new Appointment();
-
                 System.out.println("Please enter the type of your appointment from the following:\n Visit\n Vaccination\n Grooming ");
                 String appointmentType = scanner.nextLine();
                 if (!"Visit".equals(appointmentType) && !"Vaccination".equals(appointmentType) && !"Grooming".equals(appointmentType)) {
                     throw new InputMismatchException("Invalid appointment type.");
                 }
-                newAppointment.setAppointmentType(appointmentType);
 
                 System.out.println("Please enter the type of your appointment time with the MM-dd-yyyy HH:mm:ss format. ");
                 String appointmentTime = scanner.nextLine();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
                 LocalDateTime fAppointmentTime = LocalDateTime.parse(appointmentTime, formatter);
-                newAppointment.setAppointmentTime(fAppointmentTime);
 
                 System.out.println("Please enter the note of your appointment. If nothing to add, please enter 0");
                 String appointmentNote = scanner.nextLine();
-                newAppointment.setAppointmentNotes(appointmentNote);
+
+                // Create a new appointment
+                Appointment newAppointment = new Appointment(appointmentType, fAppointmentTime, appointmentNote);
 
                 // Add the new appointment to the pet's appointment list
                 targetPet.addNewAppointment(newAppointment);
@@ -141,6 +141,7 @@ public class PetCareScheduler {
             }
         }
 
+        System.out.println("Appointment scheduled! ");
     }
 
     public static void viewRecords() {
@@ -229,25 +230,33 @@ public class PetCareScheduler {
             return;
         }
 
-        // Produce simple reports including: 
-        // - Pets with upcoming appointments in the next week 
-        // - Pets overdue for a vet visit (For example: No vet visit in the last 6 months)
         pets.values().forEach(pet -> {
+            System.out.println("Please enter the report you want to generate for " + pet.getName());
+            System.out.println("1. Upcoming appointments in the next week: ");
+            System.out.println("2. Overdue appointments for a vet visit in the last 6 months:  ");
+
+            String userInput = scanner.nextLine();
+
             System.out.println(pet);
 
-            // - Pets with upcoming appointments in the next week 
-            System.out.println(pet.getName() + "'s upcoming appointments in the next week: ");
-            pet.getNextWeekAppointments().forEach(appointment -> {
-                System.out.println(appointment);
-            });
+            switch (userInput) {
+                case "1":
+                    System.out.println(pet.getName() + "'s upcoming appointments in the next week: ");
+                    pet.getNextWeekAppointments().forEach(appointment -> {
+                        System.out.println(appointment);
+                    });
+                    break;
+                case "2":
+                    System.out.println(pet.getName() + "'s overdue appointments for a vet visit in the last 6 months: ");
+                    pet.getOverdueVetAppointments().forEach(appointment -> {
+                        System.out.println(appointment);
+                    });
+                    break;
 
-            // - Pets overdue for a vet visit (For example: No vet visit in the last 6 months)
-            System.out.println(pet.getName() + "'s overdue appointments for a vet visit in the last 6 months: ");
-            pet.getOverdueVetAppointments().forEach(appointment -> {
-                System.out.println(appointment);
-            });
-
+            }
         });
+
+        System.out.println("Report generated! ");
 
     }
 
@@ -259,6 +268,8 @@ public class PetCareScheduler {
         } catch (IOException e) {
             System.out.println("Error saving data: " + e.getMessage());
         }
+
+        System.out.println("Data saved! ");
     }
 
     @SuppressWarnings("unchecked")
