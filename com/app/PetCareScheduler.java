@@ -15,13 +15,11 @@ import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class PetCareScheduler {
 
     private static Map<String, Pet> pets = new HashMap<>();
-    private static ArrayList<Appointment> upcomingAppointments = new ArrayList<>();
-    private static ArrayList<Appointment> pastAppointments= new ArrayList<>();
-
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -135,8 +133,6 @@ public class PetCareScheduler {
                 // Add the new appointment to the pet's appointment list
                 targetPet.addNewAppointment(newAppointment);
 
-                // Add the new appointment to the list of appointmens
-                upcomingAppointments.add(newAppointment);
                 break;
             } catch (InputMismatchException e) {
                 System.err.println("Error: " + e.getMessage());
@@ -148,6 +144,11 @@ public class PetCareScheduler {
     }
 
     public static void viewRecords() {
+        if (pets.isEmpty()) {
+            System.out.println("There is no pet yet. Register first. ");
+            return;
+        }
+
         // Show the following information based on the option chosen: 
         System.out.println("Please enter the record you want to view:\n 1. View all pets. \n 2. View all Appointment of a specific pet\n 3. Upcoming appointments for all pets\n 4. Past appointment history for each pet");
         String userInput = scanner.nextLine();
@@ -169,24 +170,54 @@ public class PetCareScheduler {
                 });
                 break;
             case "3":
-                // View upcoming appointments for all pets 
-                if (upcomingAppointments.isEmpty()) {
+                // View upcoming appointments for all pets
+                ArrayList<Appointment> upcomingAppointmentsForAllPets = new ArrayList<>();
+
+                for (Pet pet : pets.values()) {
+                    if (pet.getListOfAppointment().isEmpty()) {
+                        continue;
+                    }
+
+                    // Get all the upcoming appointments on this pet
+                    LocalDateTime currentTime = LocalDateTime.now();
+
+                    ArrayList<Appointment> upcomingAppointments = pet.getListOfAppointment().stream()
+                            .filter(appointment -> appointment.getAppointmentTime().isAfter(currentTime))
+                            .collect(Collectors.toCollection(ArrayList::new));
+
+                    upcomingAppointmentsForAllPets.addAll(upcomingAppointments);
+                }
+
+                if (upcomingAppointmentsForAllPets.isEmpty()) {
                     System.out.println("This is no upcoming appointments. ");
                 } else {
-                    upcomingAppointments.forEach(appointment -> {
+                    upcomingAppointmentsForAllPets.forEach(appointment -> {
                         System.out.println(appointment);
                     });
                 }
+
                 break;
             case "4":
                 // - Past appointment history for each pet
-                if (pastAppointments.isEmpty()) {
-                    System.out.println("There is no past appointment. ");
-                } else {
+                for (Pet pet : pets.values()) {
+                    System.out.println("Pet Name: " + pet);
+
+                    if (pet.getListOfAppointment().isEmpty()) {
+                        System.out.println(pet + "has no past appointment. ");
+                        continue;
+                    }
+
+                    LocalDateTime currentTime = LocalDateTime.now();
+
+                    ArrayList<Appointment> pastAppointments = pet.getListOfAppointment().stream()
+                            .filter(appointment -> appointment.getAppointmentTime().isBefore(currentTime))
+                            .collect(Collectors.toCollection(ArrayList::new));
+
                     pastAppointments.forEach(appointment -> {
                         System.out.println(appointment);
                     });
                 }
+
                 break;
         }
 
@@ -205,11 +236,13 @@ public class PetCareScheduler {
             System.out.println(pet);
 
             // - Pets with upcoming appointments in the next week 
-            pet.getUpcomingAppointmentsNextWeek().forEach(appointment -> {
+            System.out.println(pet.getName() + "'s upcoming appointments in the next week: ");
+            pet.getNextWeekAppointments().forEach(appointment -> {
                 System.out.println(appointment);
             });
 
             // - Pets overdue for a vet visit (For example: No vet visit in the last 6 months)
+            System.out.println(pet.getName() + "'s overdue appointments for a vet visit in the last 6 months: ");
             pet.getOverdueVetAppointments().forEach(appointment -> {
                 System.out.println(appointment);
             });

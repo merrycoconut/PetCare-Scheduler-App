@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class Pet implements Serializable{
+public class Pet implements Serializable {
 
     private int id = 0;
     private String name;
@@ -59,24 +59,30 @@ public class Pet implements Serializable{
         return this.listOfAppointments;
     }
 
-    public ArrayList<Appointment> getUpcomingAppointmentsNextWeek() {
-        ArrayList<Appointment> allAppointments = this.listOfAppointments;
+    public ArrayList<Appointment> getNextWeekAppointments() {
+        ArrayList<Appointment> appointments = this.listOfAppointments;
 
         LocalDateTime currentTime = LocalDateTime.now();
         LocalDateTime nextWeek = currentTime.plusDays(7);
 
-        ArrayList<Appointment> upComingAppointments = allAppointments.stream()
+        ArrayList<Appointment> nextWeekAppointments = appointments.stream()
                 .filter(appointment -> appointment.getAppointmentTime().isAfter(currentTime) && appointment.getAppointmentTime().isBefore(nextWeek))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        return upComingAppointments;
+        return nextWeekAppointments;
     }
 
     public ArrayList<Appointment> getOverdueVetAppointments() {
-        ArrayList<Appointment> allAppointments = this.listOfAppointments;
+        ArrayList<Appointment> appointments = this.listOfAppointments;
 
-        ArrayList<Appointment> overdueAppointments = allAppointments.stream()
-                .filter(appointment -> appointment.getAppointmentTime().isBefore(LocalDateTime.now()))
+        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime pastSixMonths = currentTime.minusMonths(6);
+
+        ArrayList<Appointment> overdueAppointments = appointments.stream()
+                .filter(appointment
+                        -> appointment.getAppointmentTime().isBefore(currentTime)
+                            && appointment.getAppointmentTime().isAfter(pastSixMonths)
+                )
                 .collect(Collectors.toCollection(ArrayList::new));
 
         return overdueAppointments;
